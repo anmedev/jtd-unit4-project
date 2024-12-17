@@ -1,14 +1,12 @@
 package com.teamtreehouse.blog.model;
 
 import com.github.slugify.Slugify;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
 public class BlogEntry {
     private String slug;
-    // Adds fields blog content
     private String title;
     private String content;
     private LocalDate date;
@@ -26,12 +24,10 @@ public class BlogEntry {
         }
     }
 
-    // Method to add comments
     public void addComment(Comment comment) {
         comments.add(comment);
     }
 
-    // Method to delete comments
     public void deleteComment(Comment comment) {
         comments.remove(comment);
     }
@@ -44,9 +40,7 @@ public class BlogEntry {
         return comments;
     }
 
-    public String getTitle() {
-        return title;
-    }
+    public String getTitle() { return title; }
 
     public void setTitle(String title) {
         this.title = title;
@@ -67,6 +61,4 @@ public class BlogEntry {
     public void setDate(LocalDate date) {
         this.date = date;
     }
-
-
 }

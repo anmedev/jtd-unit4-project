@@ -8,11 +8,9 @@ import com.teamtreehouse.blog.model.Comment;
 import spark.ModelAndView;
 import spark.Request;
 import spark.template.handlebars.HandlebarsTemplateEngine;
-
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
-
 import static spark.Spark.*;
 
 public class Main {
@@ -22,9 +20,24 @@ public class Main {
         staticFileLocation("/public");
         BlogDao dao = new SimpleBlogDao();
 
+        //  Before Filters
         before((req, res) -> {
             if (req.cookie("admin") != null) {
                 req.attribute("admin", req.cookie("admin"));
+            }
+        });
+
+        before("/new", (req, res) -> {
+            if (!"admin".equals(req.cookie("admin"))) {
+                res.redirect("/password");
+                halt();  // Stop further execution
+            }
+        });
+
+        before("/edit/:slug", (req, res) -> {
+            if (!"admin".equals(req.cookie("admin"))) {
+                res.redirect("/password");
+                halt();  // Stop further execution
             }
         });
 
@@ -35,12 +48,49 @@ public class Main {
             return new ModelAndView(model, "index.hbs");
         }, new HandlebarsTemplateEngine());
 
+        // Route to Get Password Page
+        get("/password", (req, res) -> {
+            Map<String, Object> model = new HashMap<>();
+            model.put("title", "Password Required");
+            return new ModelAndView(model, "password.hbs");
+        }, new HandlebarsTemplateEngine());
+
+        // Route to Handle Password Page
+        post("/password", (req, res) -> {
+            String password = req.queryParams("password");
+            if ("admin".equals(password)) {
+                res.cookie("admin", "admin");  // Set cookie for successful login
+                res.redirect("/");
+            } else {
+                Map<String, Object> model = new HashMap<>();
+                model.put("title", "Password Required");
+                model.put("error", "Invalid password. Please try again.");
+                return new ModelAndView(model, "password.hbs");
+            }
+            return null;
+        }, new HandlebarsTemplateEngine());
+
         // Route for Detail Page
         get("/detail/:slug", (req, res) -> {
             Map<String, Object> model = new HashMap<>();
-            model.put("detail", dao.findEntryBySlug(req.params("slug")));
+            try {
+                BlogEntry entry = dao.findEntryBySlug(req.params("slug"));
+                model.put("detail", entry);
+            } catch (NotFoundException e) {
+                // Return a custom error page or a redirect if the entry isn't found
+                res.status(404); // Set HTTP status to 404 for not found
+                model.put("error", "Blog entry not found.");
+            }
             return new ModelAndView(model, "detail.hbs");
         }, new HandlebarsTemplateEngine());
+
+//        get("/detail/:slug", (req, res) -> {
+//            Map<String, Object> model = new HashMap<>();
+//            BlogEntry entry = dao.findEntryBySlug(req.params("slug"));
+//            model.put("entry", entry);
+//            model.put("comments", entry.getComments());
+//            return new ModelAndView(model, "detail.hbs");
+//        }, new HandlebarsTemplateEngine());
 
         // Route to Get a New Blog Entry Page
         get("/new", (req, res) -> {
@@ -112,13 +162,5 @@ public class Main {
 //        private static void setFlashMessage(Request req, String message) {
 //            req.session().attribute(FLASH_MESSAGE_KEY, message);
 //        }
-
-
-
-
-
-
-
-
     }
 }

@@ -1,7 +1,6 @@
 package com.teamtreehouse.blog.dao;
 
 import com.teamtreehouse.blog.model.BlogEntry;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
