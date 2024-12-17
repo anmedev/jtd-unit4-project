@@ -1,4 +1,4 @@
-# Treehouse Java Techdegree: Unit 3 Project
+# Treehouse Java Techdegree: Unit 4 Project
 _My code for the Treehouse Java Techdegree: Unit 4 project_
 \
 _**By Anelle Mensah**_
