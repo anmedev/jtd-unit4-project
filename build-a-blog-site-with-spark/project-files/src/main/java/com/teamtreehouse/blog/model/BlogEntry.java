@@ -3,6 +3,7 @@ package com.teamtreehouse.blog.model;
 import com.github.slugify.Slugify;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class BlogEntry {
@@ -22,6 +23,8 @@ public class BlogEntry {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        comments = new ArrayList<>();
     }
 
     public void addComment(Comment comment) {

@@ -14,7 +14,6 @@ import java.util.Map;
 import static spark.Spark.*;
 
 public class Main {
-    private static final String FLASH_MESSAGE_KEY = "flash_message";
 
     public static void main(String[] args) {
         staticFileLocation("/public");
@@ -28,18 +27,39 @@ public class Main {
         });
 
         before("/new", (req, res) -> {
-            if (!"admin".equals(req.cookie("admin"))) {
+            if(req.attribute("admin") == null){
+                req.session().attribute("redirectAfterLogin", req.uri());
                 res.redirect("/password");
                 halt();
             }
         });
 
         before("/edit/:slug", (req, res) -> {
-            if (!"admin".equals(req.cookie("admin"))) {
+            if (req.attribute("admin") == null) {
+                // Store the slug in the session for later use
+                req.session().attribute("redirectSlug", req.params("slug"));
+                req.session().attribute("redirectAfterLogin", req.uri()); // Store the full URI if needed for further redirects
                 res.redirect("/password");
                 halt();
             }
         });
+
+//        before("/edit/:slug", (req, res) -> {
+//            if (req.attribute("admin") == null) {
+//                req.session().attribute("redirectSlug", req.params("slug"));  // Save the slug in the session
+//                req.session().attribute("redirectAfterLogin", req.uri());  // Save the current page URI
+//                res.redirect("/password");
+//                halt();
+//            }
+//        });
+
+//        before("/edit/:slug", (req, res) -> {
+//            if(req.attribute("admin") == null){
+//                req.session().attribute("redirectAfterLogin", req.uri());
+//                res.redirect("/password");
+//                halt();
+//            }
+//        });
 
         // Route for Index Page
         get("/", (req, res) -> {
@@ -60,7 +80,7 @@ public class Main {
             String password = req.queryParams("password");
             if ("admin".equals(password)) {
                 res.cookie("admin", "admin");
-                res.redirect("/");
+                res.redirect("/new");
             } else {
                 Map<String, Object> model = new HashMap<>();
                 model.put("title", "Password Required");
@@ -70,7 +90,6 @@ public class Main {
             return null;
         }, new HandlebarsTemplateEngine());
 
-        // Route for Detail Page
         get("/detail/:slug", (req, res) -> {
             Map<String, Object> model = new HashMap<>();
             try {
@@ -123,12 +142,13 @@ public class Main {
         });
 
         // Route to Add a Comment to a Blog Entry
-        post("/detail/:slug/comment", (req, res) -> {
+        post("/detail/:slug", (req, res) -> {
             String slug = req.params("slug");
-            BlogEntry entry = dao.findEntryBySlug(slug);
             String author = req.queryParams("author");
             String content = req.queryParams("content");
             LocalDate date = LocalDate.now();
+
+            BlogEntry entry = dao.findEntryBySlug(slug);
 
             Comment comment = new Comment(author, content, date);
             entry.addComment(comment);
@@ -136,21 +156,5 @@ public class Main {
             res.redirect("/detail/" + slug);
             return null;
         });
-
-
-
-//        private static String getFlashMessage(Request req) {
-//            if (req.session(false) == null) {
-//                return null;
-//            }
-//            if (req.session().attributes().contains(FLASH_MESSAGE_KEY)) {
-//                return null;
-//            }
-//            return req.session().attribute(FLASH_MESSAGE_KEY);
-//        }
-//
-//        private static void setFlashMessage(Request req, String message) {
-//            req.session().attribute(FLASH_MESSAGE_KEY, message);
-//        }
     }
 }
