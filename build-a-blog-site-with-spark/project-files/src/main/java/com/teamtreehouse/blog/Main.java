@@ -30,14 +30,14 @@ public class Main {
         before("/new", (req, res) -> {
             if (!"admin".equals(req.cookie("admin"))) {
                 res.redirect("/password");
-                halt();  // Stop further execution
+                halt();
             }
         });
 
         before("/edit/:slug", (req, res) -> {
             if (!"admin".equals(req.cookie("admin"))) {
                 res.redirect("/password");
-                halt();  // Stop further execution
+                halt();
             }
         });
 
@@ -59,7 +59,7 @@ public class Main {
         post("/password", (req, res) -> {
             String password = req.queryParams("password");
             if ("admin".equals(password)) {
-                res.cookie("admin", "admin");  // Set cookie for successful login
+                res.cookie("admin", "admin");
                 res.redirect("/");
             } else {
                 Map<String, Object> model = new HashMap<>();
@@ -83,14 +83,6 @@ public class Main {
             }
             return new ModelAndView(model, "detail.hbs");
         }, new HandlebarsTemplateEngine());
-
-//        get("/detail/:slug", (req, res) -> {
-//            Map<String, Object> model = new HashMap<>();
-//            BlogEntry entry = dao.findEntryBySlug(req.params("slug"));
-//            model.put("entry", entry);
-//            model.put("comments", entry.getComments());
-//            return new ModelAndView(model, "detail.hbs");
-//        }, new HandlebarsTemplateEngine());
 
         // Route to Get a New Blog Entry Page
         get("/new", (req, res) -> {
@@ -117,7 +109,6 @@ public class Main {
             return new ModelAndView(model, "edit.hbs");
         }, new HandlebarsTemplateEngine());
 
-
         // Route to Handle Edited Blog Entry Page
         post("/edit/:slug", (req, res) -> {
             String slug = req.params("slug");
@@ -130,7 +121,6 @@ public class Main {
             res.redirect("/detail/" + entry.getSlug());
             return null;
         });
-
 
         // Route to Add a Comment to a Blog Entry
         post("/detail/:slug/comment", (req, res) -> {
