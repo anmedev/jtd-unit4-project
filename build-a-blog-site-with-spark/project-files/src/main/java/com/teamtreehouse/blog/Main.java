@@ -44,23 +44,6 @@ public class Main {
             }
         });
 
-//        before("/edit/:slug", (req, res) -> {
-//            if (req.attribute("admin") == null) {
-//                req.session().attribute("redirectSlug", req.params("slug"));  // Save the slug in the session
-//                req.session().attribute("redirectAfterLogin", req.uri());  // Save the current page URI
-//                res.redirect("/password");
-//                halt();
-//            }
-//        });
-
-//        before("/edit/:slug", (req, res) -> {
-//            if(req.attribute("admin") == null){
-//                req.session().attribute("redirectAfterLogin", req.uri());
-//                res.redirect("/password");
-//                halt();
-//            }
-//        });
-
         // Route for Index Page
         get("/", (req, res) -> {
             Map<String, Object> model = new HashMap<>();
@@ -78,9 +61,10 @@ public class Main {
         // Route to Handle Password Page
         post("/password", (req, res) -> {
             String password = req.queryParams("password");
+        String redirectAfterLogin = req.session().attribute("redirectAfterLogin");
             if ("admin".equals(password)) {
                 res.cookie("admin", "admin");
-                res.redirect("/new");
+                res.redirect(redirectAfterLogin);
             } else {
                 Map<String, Object> model = new HashMap<>();
                 model.put("title", "Password Required");

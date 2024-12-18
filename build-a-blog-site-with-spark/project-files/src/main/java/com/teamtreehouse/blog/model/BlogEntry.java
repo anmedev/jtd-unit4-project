@@ -31,10 +31,6 @@ public class BlogEntry {
         comments.add(comment);
     }
 
-    public void deleteComment(Comment comment) {
-        comments.remove(comment);
-    }
-
     public String getSlug() {
         return slug;
     }

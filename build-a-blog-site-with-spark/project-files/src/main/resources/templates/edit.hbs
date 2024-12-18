@@ -17,12 +17,12 @@
     <div class="container">
         <div class="new-entry">
             <h2>Edit Blog Entry</h2>
-            <form action="/edit/{{slug}}" method="POST">
+            <form action="/edit/{{entry.slug}}" method="POST">
                 <label for="title">Title</label>
-                <input type="text" name="title" id="title" value="{{title}}" required>
+                <input type="text" name="title" id="title" value="{{entry.title}}" required>
 
                 <label for="content">Content</label>
-                <textarea name="content" id="content" rows="10" required>{{content}}</textarea>
+                <textarea name="content" id="content" rows="10" required>{{entry.content}}</textarea>
 
                 <input type="submit" value="Save Changes" class="button">
                 <a href="/" class="button button-secondary">Cancel</a>
