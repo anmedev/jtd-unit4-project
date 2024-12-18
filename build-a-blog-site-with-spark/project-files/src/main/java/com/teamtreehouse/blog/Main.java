@@ -6,11 +6,12 @@ import com.teamtreehouse.blog.dao.SimpleBlogDao;
 import com.teamtreehouse.blog.model.BlogEntry;
 import com.teamtreehouse.blog.model.Comment;
 import spark.ModelAndView;
-import spark.Request;
 import spark.template.handlebars.HandlebarsTemplateEngine;
+
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+
 import static spark.Spark.*;
 
 public class Main {
@@ -19,7 +20,7 @@ public class Main {
         staticFileLocation("/public");
         BlogDao dao = new SimpleBlogDao();
 
-        //  Before Filters
+        // Before Filters
         before((req, res) -> {
             if (req.cookie("admin") != null) {
                 req.attribute("admin", req.cookie("admin"));
@@ -27,8 +28,9 @@ public class Main {
         });
 
         before("/new", (req, res) -> {
-            if(req.attribute("admin") == null){
+            if (req.attribute("admin") == null) {
                 req.session().attribute("redirectAfterLogin", req.uri());
+                System.out.println("Session attribute redirectAfterLogin set to: " + req.session().attribute("redirectAfterLogin"));
                 res.redirect("/password");
                 halt();
             }
@@ -36,9 +38,8 @@ public class Main {
 
         before("/edit/:slug", (req, res) -> {
             if (req.attribute("admin") == null) {
-                // Store the slug in the session for later use
-                req.session().attribute("redirectSlug", req.params("slug"));
-                req.session().attribute("redirectAfterLogin", req.uri()); // Store the full URI if needed for further redirects
+                String redirectUri = req.uri();
+                req.session().attribute("redirectAfterLogin", redirectUri);
                 res.redirect("/password");
                 halt();
             }
@@ -61,10 +62,22 @@ public class Main {
         // Route to Handle Password Page
         post("/password", (req, res) -> {
             String password = req.queryParams("password");
-        String redirectAfterLogin = req.session().attribute("redirectAfterLogin");
+            String redirectAfterLogin = req.session().attribute("redirectAfterLogin");
+
             if ("admin".equals(password)) {
                 res.cookie("admin", "admin");
-                res.redirect(redirectAfterLogin);
+                System.out.println("Admin cookie set, redirecting to: " + redirectAfterLogin);
+                req.session().removeAttribute("redirectAfterLogin");
+
+                if (redirectAfterLogin != null) {
+                    res.redirect(redirectAfterLogin);
+                } else {
+                    if (req.session().attribute("redirectSlug") == null) {
+                        res.redirect("/new");
+                    } else {
+                        res.redirect("/");
+                    }
+                }
             } else {
                 Map<String, Object> model = new HashMap<>();
                 model.put("title", "Password Required");
@@ -74,14 +87,14 @@ public class Main {
             return null;
         }, new HandlebarsTemplateEngine());
 
+        // Route to Get Detail Page
         get("/detail/:slug", (req, res) -> {
             Map<String, Object> model = new HashMap<>();
             try {
                 BlogEntry entry = dao.findEntryBySlug(req.params("slug"));
                 model.put("detail", entry);
             } catch (NotFoundException e) {
-                // Return a custom error page or a redirect if the entry isn't found
-                res.status(404); // Set HTTP status to 404 for not found
+                res.status(404);
                 model.put("error", "Blog entry not found.");
             }
             return new ModelAndView(model, "detail.hbs");
