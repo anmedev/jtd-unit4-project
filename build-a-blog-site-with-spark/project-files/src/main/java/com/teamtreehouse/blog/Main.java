@@ -63,20 +63,12 @@ public class Main {
         post("/password", (req, res) -> {
             String password = req.queryParams("password");
             String redirectAfterLogin = req.session().attribute("redirectAfterLogin");
-
             if ("admin".equals(password)) {
                 res.cookie("admin", "admin");
-                System.out.println("Admin cookie set, redirecting to: " + redirectAfterLogin);
-                req.session().removeAttribute("redirectAfterLogin");
-
                 if (redirectAfterLogin != null) {
                     res.redirect(redirectAfterLogin);
                 } else {
-                    if (req.session().attribute("redirectSlug") == null) {
-                        res.redirect("/new");
-                    } else {
-                        res.redirect("/");
-                    }
+                    res.redirect("/");
                 }
             } else {
                 Map<String, Object> model = new HashMap<>();
@@ -86,6 +78,32 @@ public class Main {
             }
             return null;
         }, new HandlebarsTemplateEngine());
+//        post("/password", (req, res) -> {
+//            String password = req.queryParams("password");
+//            String redirectAfterLogin = req.session().attribute("redirectAfterLogin");
+//
+//            if ("admin".equals(password)) {
+//                res.cookie("admin", "admin");
+//                System.out.println("Admin cookie set, redirecting to: " + redirectAfterLogin);
+//                req.session().removeAttribute("redirectAfterLogin");
+//
+//                if (redirectAfterLogin != null) {
+//                    res.redirect(redirectAfterLogin);
+//                } else {
+//                    if (req.session().attribute("redirectSlug") == null) {
+//                        res.redirect("/new");
+//                    } else {
+//                        res.redirect("/");
+//                    }
+//                }
+//            } else {
+//                Map<String, Object> model = new HashMap<>();
+//                model.put("title", "Password Required");
+//                model.put("error", "Invalid password. Please try again.");
+//                return new ModelAndView(model, "password.hbs");
+//            }
+//            return null;
+//        }, new HandlebarsTemplateEngine());
 
         // Route to Get Detail Page
         get("/detail/:slug", (req, res) -> {
